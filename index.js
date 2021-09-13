@@ -123,4 +123,16 @@ client.on('message', async message => {
   }
 });
 
+// Automatically reconnect if the bot disconnects due to inactivity
+client.on('disconnect', function (erMsg, code) {
+  console.log(
+    '----- Bot disconnected from Discord with code',
+    code,
+    'for reason:',
+    erMsg,
+    '-----'
+  );
+  client.connect();
+});
+
 client.login(process.env.TOKEN);
