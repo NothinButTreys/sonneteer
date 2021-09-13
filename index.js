@@ -25,12 +25,12 @@ client.on('message', async message => {
 
   // DisTube event listeners, more in the documentation page
   distube
-    .on('playSong', (message, song) =>
+    .on('playSong', (message, queue, song) =>
       message.channel.send(
         `Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user.tag}`
       )
     )
-    .on('addSong', (message, song) =>
+    .on('addSong', (message, queue, song) =>
       message.channel.send(
         `Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user.tag}`
       )
