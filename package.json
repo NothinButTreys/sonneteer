@@ -8,10 +8,6 @@
   "scripts": {
     "start": "node index.js"
   },
-  "engines": {
-    "node": "16.6.2",
-    "npm": "7.22.0"
-  },
   "keywords": [
     "discord",
     "music",
