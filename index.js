@@ -1,3 +1,4 @@
+require('dotenv').config();
 //DiscordJS
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -6,17 +7,14 @@ const client = new Discord.Client();
 const DisTube = require('distube');
 const distube = new DisTube(client, { searchSongs: false, omitNewSongsOnly: true });
 
-const { token, prefix } = require('./config.json');
-
 client.on('ready', () => {
   console.log(`${client.user.tag} has loggged in.`);
 });
 
 client.on('message', async message => {
-  console.log(message);
   if (message.author.bot) return;
-  if (!message.content.startsWith(prefix)) return;
-  const args = message.content.slice(prefix.length).trim().split(/ +/g);
+  if (!message.content.startsWith(process.env.PREFIX)) return;
+  const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
   const command = args.shift();
 
   // Queue status template
@@ -27,12 +25,12 @@ client.on('message', async message => {
 
   // DisTube event listeners, more in the documentation page
   distube
-    .on('playSong', (message, queue, song) =>
+    .on('playSong', (message, song) =>
       message.channel.send(
         `Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user.tag}`
       )
     )
-    .on('addSong', (message, queue, song) =>
+    .on('addSong', (message, song) =>
       message.channel.send(
         `Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user.tag}`
       )
@@ -125,4 +123,4 @@ client.on('message', async message => {
   }
 });
 
-client.login(token);
+client.login(process.env.TOKEN);
