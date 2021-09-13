@@ -3,9 +3,13 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-//DisTube
+// Create a new DisTube
 const DisTube = require('distube');
-const distube = new DisTube(client, { searchSongs: false, omitNewSongsOnly: true });
+const distube = new DisTube(client, {
+  searchSongs: true,
+  emitNewSongOnly: true,
+  highWaterMark: 1 << 25,
+});
 
 client.on('ready', () => {
   console.log(`${client.user.tag} has loggged in.`);
@@ -16,56 +20,6 @@ client.on('message', async message => {
   if (!message.content.startsWith(process.env.PREFIX)) return;
   const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
   const command = args.shift();
-
-  // Queue status template
-  const status = queue =>
-    `Volume: \`${queue.volume}%\` | Filter: \`${queue.filter || 'Off'}\` | Loop: \`${
-      queue.repeatMode ? (queue.repeatMode == 2 ? 'All Queue' : 'This Song') : 'Off'
-    }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
-
-  // DisTube event listeners, more in the documentation page
-  distube
-    .on('playSong', (message, queue, song) =>
-      message.channel.send(
-        `Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user.tag}`
-      )
-    )
-    .on('addSong', (message, queue, song) =>
-      message.channel.send(
-        `Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user.tag}`
-      )
-    )
-    .on('playList', (message, queue, playlist, song) =>
-      message.channel.send(
-        `Play \`${playlist.name}\` playlist (${
-          playlist.songs.length
-        } songs).\nRequested by: ${song.user.tag}\nNow playing \`${song.name}\` - \`${
-          song.formattedDuration
-        }\`\n${status(queue)}`
-      )
-    )
-    .on('addList', (message, queue, playlist) =>
-      message.channel.send(
-        `Added \`${playlist.name}\` playlist (${
-          playlist.songs.length
-        } songs) to queue\n${status(queue)}`
-      )
-    )
-    // DisTubeOptions.searchSongs = true
-    .on('searchResult', (message, result) => {
-      let i = 0;
-      message.channel.send(
-        `**Choose an option from below**\n${result
-          .map(song => `**${++i}**. ${song.name} - \`${song.formattedDuration}\``)
-          .join('\n')}\n*Enter anything else or wait 60 seconds to cancel*`
-      );
-    })
-    // DisTubeOptions.searchSongs = true
-    .on('searchCancel', message => message.channel.send(`Searching canceled`))
-    .on('error', (message, e) => {
-      console.error(e);
-      message.channel.send('An error encountered: ' + e);
-    });
 
   if (command == 'play') {
     if (!args[0]) {
@@ -122,6 +76,56 @@ client.on('message', async message => {
     );
   }
 });
+
+// Queue status template
+const status = queue =>
+  `Volume: \`${queue.volume}%\` | Filter: \`${queue.filter || 'Off'}\` | Loop: \`${
+    queue.repeatMode ? (queue.repeatMode == 2 ? 'All Queue' : 'This Song') : 'Off'
+  }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
+
+// DisTube event listeners
+distube
+  .on('playSong', (message, queue, song) =>
+    message.channel.send(
+      `Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user.tag}`
+    )
+  )
+  .on('addSong', (message, queue, song) =>
+    message.channel.send(
+      `Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user.tag}`
+    )
+  )
+  .on('playList', (message, queue, playlist, song) =>
+    message.channel.send(
+      `Play \`${playlist.name}\` playlist (${
+        playlist.songs.length
+      } songs).\nRequested by: ${song.user.tag}\nNow playing \`${song.name}\` - \`${
+        song.formattedDuration
+      }\`\n${status(queue)}`
+    )
+  )
+  .on('addList', (message, queue, playlist) =>
+    message.channel.send(
+      `Added \`${playlist.name}\` playlist (${
+        playlist.songs.length
+      } songs) to queue\n${status(queue)}`
+    )
+  )
+  // DisTubeOptions.searchSongs = true
+  .on('searchResult', (message, result) => {
+    let i = 0;
+    message.channel.send(
+      `**Choose an option from below**\n${result
+        .map(song => `**${++i}**. ${song.name} - \`${song.formattedDuration}\``)
+        .join('\n')}\n*Enter anything else or wait 60 seconds to cancel*`
+    );
+  })
+  // DisTubeOptions.searchSongs = true
+  .on('searchCancel', message => message.channel.send(`Searching canceled`))
+  .on('error', (message, e) => {
+    console.error(e);
+    message.channel.send('An error encountered: ' + e);
+  });
 
 var express = require('express');
 var app = express();
