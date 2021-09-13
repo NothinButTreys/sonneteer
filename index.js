@@ -123,16 +123,14 @@ client.on('message', async message => {
   }
 });
 
-// Automatically reconnect if the bot disconnects due to inactivity
-client.on('disconnect', function (erMsg, code) {
-  console.log(
-    '----- Bot disconnected from Discord with code',
-    code,
-    'for reason:',
-    erMsg,
-    '-----'
-  );
-  client.connect();
+var express = require('express');
+var app = express();
+var path = require('path');
+
+app.use(express.static(__dirname + '/'));
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, './src/index.html'));
 });
+app.listen(process.env.PORT || 8080);
 
 client.login(process.env.TOKEN);
