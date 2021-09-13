@@ -1,20 +1,19 @@
 {
   "name": "sonneteer",
   "version": "1.0.0",
+  "author": "@tomfmcbride",
   "description": "A simple discord music bot",
   "main": "index.js",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "build": "webpack --mode production"
+    "start": "node index.js"
   },
   "keywords": [
     "discord",
     "music",
     "bot"
   ],
-  "type": "module",
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "discord.js": "^12.5.3",
