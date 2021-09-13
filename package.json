@@ -6,8 +6,11 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
+  },
+  "engines": {
+    "node": "16.6.2",
+    "npm": "7.22.0"
   },
   "keywords": [
     "discord",
