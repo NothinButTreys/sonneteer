@@ -1,7 +1,7 @@
 {
   "name": "sonneteer",
   "version": "1.0.0",
-  "author": "@tomfmcbride",
+  "author": "tomfmcbride",
   "description": "A simple discord music bot",
   "main": "index.js",
   "private": true,
