@@ -29,7 +29,7 @@ client.on('message', async message => {
       return message.channel.send('You are not in a voice channel.');
     }
 
-    distube.play(message, args.join(' '));
+    distube.playSkip(message, args.join(' '));
   }
 
   if (command == 'stop') {
