@@ -32,7 +32,6 @@ client.distube = new DisTube(client, {
 client.commands = new Discord.Collection()
 client.aliases = new Discord.Collection()
 client.emotes = {
-  "emoji": {
       "play": "▶️",
       "stop": "⏹️",
       "queue": "📄",
@@ -40,7 +39,6 @@ client.emotes = {
       "repeat": "🔁",
       "error": "❌"
   }
-}
 
 fs.readdir('./commands/', (err, files) => {
   if (err) return console.log('Could not find any commands!')
