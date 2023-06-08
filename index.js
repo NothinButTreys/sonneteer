@@ -1,4 +1,4 @@
-import rg4js from 'raygun4js';
+require('raygun4js');
 require("dotenv").config();
 
 const { DisTube } = require('distube');
