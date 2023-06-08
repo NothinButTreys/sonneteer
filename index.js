@@ -76,7 +76,7 @@ client.on('messageCreate', async message => {
 const status = queue =>
   `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${
     queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
-  }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``
+  }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
 client.distube
   .on('playSong', (queue, song) =>
     queue.textChannel.send(
@@ -107,14 +107,14 @@ client.distube
   )
   .on('finish', queue => queue.textChannel.send('Finished!'))
 
-var express = require('express');
-var app = express();
-var path = require('path');
+// var express = require('express');
+// var app = express();
+// var path = require('path');
 
-app.use(express.static(__dirname + '/'));
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, './src/index.html'));
-});
-app.listen(process.env.PORT || 8080);
+// app.use(express.static(__dirname + '/'));
+// app.get('*', (req, res) => {
+//   res.sendFile(path.resolve(__dirname, './src/index.html'));
+// });
+// app.listen(process.env.PORT || 8080);
 
 client.login(process.env.TOKEN);
