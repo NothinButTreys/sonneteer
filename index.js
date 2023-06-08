@@ -1,5 +1,5 @@
 require("dotenv").config();
-//DiscordJS
+const { DisTube } = require('distube')
 const Discord = require('discord.js')
 const client = new Discord.Client({
   intents: [
@@ -8,14 +8,15 @@ const client = new Discord.Client({
     Discord.GatewayIntentBits.GuildVoiceStates,
     Discord.GatewayIntentBits.MessageContent
   ]
-});
+})
+const fs = require('fs')
+const config = require('./config.json')
+const { SpotifyPlugin } = require('@distube/spotify')
+const { SoundCloudPlugin } = require('@distube/soundcloud')
+const { YtDlpPlugin } = require('@distube/yt-dlp')
 
-// Create a new DisTube
-const { DisTube } = require('distube');
-const { SpotifyPlugin } = require('@distube/spotify');
-const { SoundCloudPlugin } = require('@distube/soundcloud');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
-const distube = new DisTube(client, {
+client.config = require('./config.json')
+client.distube = new DisTube(client, {
   leaveOnStop: false,
   emitNewSongOnly: true,
   emitAddSongWhenCreatingQueue: false,
@@ -27,128 +28,79 @@ const distube = new DisTube(client, {
     new SoundCloudPlugin(),
     new YtDlpPlugin()
   ]
-});
+})
+client.commands = new Discord.Collection()
+client.aliases = new Discord.Collection()
+client.emotes = config.emoji
+
+fs.readdir('./commands/', (err, files) => {
+  if (err) return console.log('Could not find any commands!')
+  const jsFiles = files.filter(f => f.split('.').pop() === 'js')
+  if (jsFiles.length <= 0) return console.log('Could not find any commands!')
+  jsFiles.forEach(file => {
+    const cmd = require(`./commands/${file}`)
+    console.log(`Loaded ${file}`)
+    client.commands.set(cmd.name, cmd)
+    if (cmd.aliases) cmd.aliases.forEach(alias => client.aliases.set(alias, cmd.name))
+  })
+})
 
 client.on('ready', () => {
-  console.log(`${client.user.tag} has loggged in.`);
-});
+  console.log(`${client.user.tag} is ready to play music.`)
+})
 
-client.on('message', async message => {
-  if (message.author.bot) return;
-  if (!message.content.startsWith(process.env.PREFIX)) return;
-  const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
-  const command = args.shift();
-
-  if (command == 'play') {
-    if (!args[0]) {
-      return message.channel.send('you must state something to play.');
-    }
-    if (!message.member.voice.channel) {
-      return message.channel.send('You are not in a voice channel.');
-    }
-
-    distube.play(message.member.voice.channel, message.options.song, {
-      member: message.member,
-      textChannel: message.channel,
-      message
-    });
+client.on('messageCreate', async message => {
+  if (message.author.bot || !message.guild) return
+  const prefix = process.env.prefix
+  if (!message.content.startsWith(prefix)) return
+  const args = message.content.slice(prefix.length).trim().split(/ +/g)
+  const command = args.shift().toLowerCase()
+  const cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command))
+  if (!cmd) return
+  if (cmd.inVoiceChannel && !message.member.voice.channel) {
+    return message.channel.send(`${client.emotes.error} | You must be in a voice channel!`)
   }
-
-  if (command == 'stop') {
-    distube.stop(message);
-    message.channel.send('You have stopped the music.');
+  try {
+    cmd.run(client, message, args)
+  } catch (e) {
+    console.error(e)
+    message.channel.send(`${client.emotes.error} | Error: \`${e}\``)
   }
+})
 
-  if (command == 'pause') {
-    distube.pause(message);
-    message.channel.send('Paused!');
-  }
-
-  if (command == 'resume') {
-    distube.resume(message);
-    message.channel.send('Continued!');
-  }
-
-  if (command == 'skip') {
-    distube.skip(message);
-    message.channel.send('Skipped!');
-  }
-
-  if (command == 'autoplay') {
-    let mode = distube.toggleAutoplay(message);
-    const messageToSend = 'Set autoplay mode to `' + (mode ? 'On' : 'Off') + '`';
-    return message.channel.send(messageToSend);
-  }
-
-  if (['loop', 'repeat'].includes(command)) {
-    let mode = distube.setRepeatMode(message, parseInt(args[0]));
-    mode = mode ? (mode == 2 ? 'Repeat queue' : 'Repeat song') : 'Off';
-    const messageToSend = 'Set repeat mode to `' + mode + '`';
-    return message.channel.send(messageToSend);
-  }
-
-  if (command == 'queue') {
-    let queue = distube.getQueue(message);
-    const messageToSend = 'Current queue:\n' + queue.songs.map((song, id) =>
-      `**${id + 1}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``
-    ).join('\n');
-
-    return message.channel.send(messageToSend);
-  }
-});
-
-// Queue status template
 const status = queue =>
-  `Volume: \`${queue.volume}%\` | Filter: \`${queue.filter || 'Off'}\` | Loop: \`${
-    queue.repeatMode ? (queue.repeatMode == 2 ? 'All Queue' : 'This Song') : 'Off'
-  }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
-
-// DisTube event listeners
-distube
-  .on('playSong', (message, queue, song) => {
-    const messageToSend = `Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user.tag}`;
-    message.channel.send(messageToSend);
+  `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${
+    queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
+  }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``
+client.distube
+  .on('playSong', (queue, song) =>
+    queue.textChannel.send(
+      `${client.emotes.play} | Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${
+        song.user
+      }\n${status(queue)}`
+    )
+  )
+  .on('addSong', (queue, song) =>
+    queue.textChannel.send(
+      `${client.emotes.success} | Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user}`
+    )
+  )
+  .on('addList', (queue, playlist) =>
+    queue.textChannel.send(
+      `${client.emotes.success} | Added \`${playlist.name}\` playlist (${
+        playlist.songs.length
+      } songs) to queue\n${status(queue)}`
+    )
+  )
+  .on('error', (channel, e) => {
+    if (channel) channel.send(`${client.emotes.error} | An error encountered: ${e.toString().slice(0, 1974)}`)
+    else console.error(e)
   })
-
-  .on('addSong', (message, queue, song) => {
-    const messageToSend = `Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user.tag}`;
-    message.channel.send(messageToSend);
-  })
-
-  .on('playList', (message, queue, playlist, song) => {
-    const messageToSend = `Play \`${playlist.name}\` playlist (${
-      playlist.songs.length
-    } songs).\nRequested by: ${song.user.tag}\nNow playing \`${song.name}\` - \`${
-      song.formattedDuration
-    }\`\n${status(queue)}`;
-    
-    return message.channel.send(messageToSend);
-  })
-
-  .on('addList', (message, queue, playlist) => {
-    const messageToSend = `Added \`${playlist.name}\` playlist (${
-      playlist.songs.length
-    } songs) to queue\n${status(queue)}`;
-    
-    return message.channel.send(messageToSend);
-  })
-
-  // DisTubeOptions.searchSongs = true
-  .on('searchResult', (message, result) => {
-    let i = 0;
-    const messageToSend = `**Choose an option from below**\n${result
-        .map(song => `**${++i}**. ${song.name} - \`${song.formattedDuration}\``)
-        .join('\n')}\n*Enter anything else or wait 60 seconds to cancel*`;
-    return message.channel.send(messageToSend);
-  })
-
-  // DisTubeOptions.searchSongs = true
-  .on('searchCancel', message => message.channel.send(`Searching canceled`))
-  .on('error', (message, e) => {
-    console.error(e);
-    const messageToSend = 'An error encountered: ' + e;
-    message.channel.send(messageToSend);
-  });
+  .on('empty', channel => channel.send('Voice channel is empty! Leaving the channel...'))
+  .on('searchNoResult', (message, query) =>
+    message.channel.send(`${client.emotes.error} | No result found for \`${query}\`!`)
+  )
+  .on('finish', queue => queue.textChannel.send('Finished!'))
 
 const express = require('express');
 const app = express();
