@@ -23,6 +23,7 @@
     "distube": "^4.0.4",
     "dotenv": "^16.1.4",
     "express": "^4.17.1",
-    "ffmpeg-static": "^4.4.0"
+    "ffmpeg-static": "^4.4.0",
+    "libsodium-wrappers": "^0.7.11"
   }
 }
