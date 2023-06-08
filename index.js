@@ -47,7 +47,7 @@ client.on('message', async message => {
       return message.channel.send('You are not in a voice channel.');
     }
 
-    distube.playVoiceChannel(message.member.voice.channel, message.options.song, {
+    distube.play(message.member.voice.channel, message.options.song, {
       member: message.member,
       textChannel: message.channel,
       message
