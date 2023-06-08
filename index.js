@@ -1,4 +1,6 @@
+import rg4js from 'raygun4js';
 require("dotenv").config();
+
 const { DisTube } = require('distube');
 const Discord = require('discord.js');
 const client = new Discord.Client({
@@ -111,6 +113,9 @@ client.distube
 var express = require('express');
 var app = express();
 var path = require('path');
+
+rg4js('apiKey', 'rg1_8qaDq7afvU2mcGQn8opkVEXh1dUpkjWr');
+rg4js('enablePulse', true);
 
 app.use(express.static(__dirname + '/'));
 app.get('*', (req, res) => {
