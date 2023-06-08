@@ -9,11 +9,11 @@ const client = new Discord.Client({
     Discord.GatewayIntentBits.MessageContent
   ]
 })
-const fs = require('fs')
-const config = require('./config.json')
-const { SpotifyPlugin } = require('@distube/spotify')
-const { SoundCloudPlugin } = require('@distube/soundcloud')
-const { YtDlpPlugin } = require('@distube/yt-dlp')
+const fs = require('fs');
+const config = require('./config.json');
+const { SpotifyPlugin } = require('@distube/spotify');
+const { SoundCloudPlugin } = require('@distube/soundcloud');
+const { YtDlpPlugin } = require('@distube/yt-dlp');
 
 client.config = require('./config.json')
 client.distube = new DisTube(client, {
@@ -31,7 +31,16 @@ client.distube = new DisTube(client, {
 })
 client.commands = new Discord.Collection()
 client.aliases = new Discord.Collection()
-client.emotes = config.emoji
+client.emotes = {
+  "emoji": {
+      "play": "▶️",
+      "stop": "⏹️",
+      "queue": "📄",
+      "success": "☑️",
+      "repeat": "🔁",
+      "error": "❌"
+  }
+}
 
 fs.readdir('./commands/', (err, files) => {
   if (err) return console.log('Could not find any commands!')
