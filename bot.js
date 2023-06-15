@@ -1,3 +1,5 @@
+
+require('dotenv').config()
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const { DisTube } = require("distube");
 const { SpotifyPlugin } = require("@distube/spotify");
@@ -81,8 +83,8 @@ fs.readdir(config.commandsDir, (err, files) => {
   });
 });
 
-if (config.TOKEN || process.env.TOKEN) {
-  client.login(config.TOKEN || process.env.TOKEN).catch((e) => {
+if (process.env.TOKEN) {
+  client.login(process.env.TOKEN).catch((e) => {
     console.log(lang.error1);
   });
 } else {
@@ -92,9 +94,9 @@ if (config.TOKEN || process.env.TOKEN) {
 }
 
 
-if (config.mongodbURL || process.env.MONGO) {
+if (process.env.MONGO) {
   const mongoose = require("mongoose")
-  mongoose.connect(config.mongodbURL || process.env.MONGO, {
+  mongoose.connect(process.env.MONGO, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   }).then(async () => {
@@ -113,4 +115,4 @@ const http = require("http");
 app.get("/", (request, response) => {
   response?.sendStatus(200);
 });
-app.listen(config.PORT);
+app.listen(config.port);
