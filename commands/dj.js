@@ -29,7 +29,6 @@ module.exports = {
     lang = lang?.language || client.language
     lang = require(`../languages/${lang}.js`);
     try {
-
       let stp = interaction.options.getSubcommand()
       if (stp === "set") {
         const role = interaction.options.getRole('role')

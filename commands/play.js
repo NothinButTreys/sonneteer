@@ -40,7 +40,6 @@ module.exports = {
 
     try {
       let stp = interaction.options.getSubcommand()
-
       if (stp === "playlist") {
         let playlistw = interaction.options.getString('name')
         let playlist = await db?.playlist?.find().catch(e => { })
@@ -134,8 +133,8 @@ module.exports = {
         }
       }
     } catch (e) {
-      const errorNotifer = require("../functions.js")
-     errorNotifer(client, interaction, e, lang)
+        const errorNotifer = require("../functions.js")
+        errorNotifer(client, interaction, e, lang)
       }
   },
 };
