@@ -1,7 +1,7 @@
 const db = require("../mongoDB");
 module.exports = {
-  name: "stop",
-  description: "Plays the previous music again.",
+  name: "back",
+  description: "Plays the previous track.",
   permissions: "0x0000000000000800",
   options: [],
   voiceChannel: true,
@@ -9,14 +9,15 @@ module.exports = {
     let lang = await db?.musicbot?.findOne({ guildID: interaction.guild.id })
     lang = lang?.language || client.language
     lang = require(`../languages/${lang}.js`);
-
     try {
-
       const queue = client.player.getQueue(interaction.guild.id);
-      if (!queue || !queue.playing) return interaction.reply({ content: lang.msg5, ephemeral: true }).catch(e => { })
-      queue.stop(interaction.guild.id);
-      return interaction.reply({ content: lang.msg85 }).catch(e => { })
-
+      if (!queue || !queue.playing) return interaction.reply({ content: `${lang.msg5}`, ephemeral: true }).catch(e => { })
+      try {
+        let song = await queue.previous()
+        interaction.reply({ content: `${lang.msg18.replace("{queue.previousTracks[1].title}", song.name)}` }).catch(e => { })
+      } catch (e) {
+        return interaction.reply({ content: `${lang.msg17}`, ephemeral: true }).catch(e => { })
+      }
     } catch (e) {
       const errorNotifer = require("../functions.js")
      errorNotifer(client, interaction, e, lang)
