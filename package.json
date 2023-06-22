@@ -22,6 +22,7 @@
     "ffmpeg-static": "^5.1.0",
     "libsodium-wrappers": "^0.7.11",
     "mongoose": "^6.10.5",
+    "opusscript": "^0.0.8",
     "sapphire": "^0.0.3",
     "topgg-autoposter": "^2.0.1"
   },
@@ -31,6 +32,6 @@
   "author": "UmutBayraktar",
   "license": "ISC",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   }
 }

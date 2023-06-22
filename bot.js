@@ -1,4 +1,3 @@
-
 require('dotenv').config()
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const { DisTube } = require("distube");
