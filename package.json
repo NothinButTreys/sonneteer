@@ -31,6 +31,6 @@
   "author": "UmutBayraktar",
   "license": "ISC",
   "engines": {
-    "node": "17.x"
+    "node": "18.x"
   }
 }
